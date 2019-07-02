@@ -1,19 +1,10 @@
 package pointi
 
 import (
-	"encoding/json"
-	"fmt"
 	"image"
 	"image/color"
-	"image/color/palette"
-	"image/draw"
-	"image/gif"
 	"image/png"
-	"io"
-	"io/ioutil"
-	"log"
 	"math/rand"
-	"net/http"
 	"os"
 
 	"github.com/EdlinOrg/prominentcolor"
@@ -21,40 +12,12 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-type imgLinks struct {
-	Raw, Full, Regular, Small, Thumb string
-}
-
-type imgUrls struct {
-	Urls imgLinks
-}
-
-var h, w int
-
-func Defaults() {
-
-	getImage()
-	var images []*image.RGBA
-
-	for i := 0; i < 10; i++ {
-		img := artistify(false)
-		h = img.Bounds().Max.X
-		w = img.Bounds().Max.Y
-		images = append(images, img.(*image.RGBA))
-	}
-
-	generateGif("test.gif", images)
-	artistify(true)
-
-}
-
-func artistify(saveFlag bool) image.Image {
-	img := readStolen("output/stolen.jpeg")
-
+func artistify(imagePath string, saveFlag bool) image.Image {
+	img := readImage(imagePath)
 	h := img.Bounds().Max.Y
 	w := img.Bounds().Max.X
 	palette := getPalette(img, 40)
-	// dc := gg.NewContextForImage(img)
+
 	dc := gg.NewContext(w, h)
 
 	for i := 0; i < w; i += 4 {
@@ -69,63 +32,11 @@ func artistify(saveFlag bool) image.Image {
 		}
 	}
 	if saveFlag {
-		dc.SaveJPG("output/out.jpeg", 80)
+		dc.SaveJPG("output.jpeg", 80)
 	} else {
 		return dc.Image()
 	}
 	return dc.Image()
-}
-
-func getImage() {
-	var list imgUrls
-	endpoint := "https://api.unsplash.com/photos/random?client_id=4b30f506ef4e2e506abe9edd3156eb33dc99194ddeb1de27bbd73aac14c7da84"
-	response, err := http.Get(endpoint)
-	if err != nil {
-		fmt.Println("HTTP request has gophailed smh")
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		json.Unmarshal([]byte(data), &list)
-	}
-
-	response, e := http.Get(list.Urls.Regular)
-	if e != nil {
-		log.Fatal(e)
-	}
-	defer response.Body.Close()
-
-	file, err := os.Create("output/stolen.jpeg")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Stole the image.")
-}
-
-func readStolen(url string) image.Image {
-	infile, err := os.Open(url)
-	if err != nil {
-		fmt.Println("Couldn't open stolen goods smh")
-		panic(err)
-	}
-	defer infile.Close()
-
-	thumbnail, _, err := image.Decode(infile)
-	if err != nil {
-		fmt.Println("Big problem with decoding image.")
-		panic(err)
-	}
-
-	b := thumbnail.Bounds()
-	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
-	draw.Draw(m, m.Bounds(), thumbnail, b.Min, draw.Src)
-
-	return m
 }
 
 func getPalette(img image.Image, k int) []color.RGBA {
@@ -187,20 +98,6 @@ func getClosestColor(palette []color.RGBA, shade color.RGBA) color.RGBA {
 		}
 	}
 	return closest
-}
-
-func generateGif(fileName string, images []*image.RGBA) {
-
-	outGif := &gif.GIF{}
-	f, _ := os.OpenFile("output/"+fileName, os.O_WRONLY|os.O_CREATE, 0600)
-	for _, simage := range images {
-		palettedImage := image.NewPaletted(image.Rect(0, 0, h, w), palette.Plan9)
-		draw.Draw(palettedImage, palettedImage.Rect, simage, image.Rect(0, 0, h, w).Min, draw.Over)
-		outGif.Image = append(outGif.Image, palettedImage)
-		outGif.Delay = append(outGif.Delay, 1)
-	}
-	defer f.Close()
-	gif.EncodeAll(f, outGif)
 }
 
 func posOrNeg() int {
