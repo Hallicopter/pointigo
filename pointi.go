@@ -6,13 +6,13 @@ import (
 
 //GenerateRandomArt takes the API key (id) for the Unsplash API using which it downloads
 //a random image and outputs either an image or even a Gif.
-func GenerateRandomArt(id string, makeGif bool) {
+func GenerateRandomArt(id string, makeGif bool, deviation int) {
 	getRandomImage(id)
 	var images []*image.RGBA
 
 	if makeGif {
 		for i := 0; i < 10; i++ {
-			img := artistify("random.jpeg", false)
+			img := artistify("random.jpeg", false, deviation)
 			h = img.Bounds().Max.X
 			w = img.Bounds().Max.Y
 			images = append(images, img.(*image.RGBA))
@@ -21,18 +21,18 @@ func GenerateRandomArt(id string, makeGif bool) {
 		generateGif("out.gif", images)
 	}
 
-	artistify("random.jpeg", true)
+	artistify("random.jpeg", true, deviation)
 }
 
 //GenerateArtFromImage takes image path as input and
 //outputs either an image or even a Gif.
-func GenerateArtFromImage(imagePath string, makeGif bool) {
+func GenerateArtFromImage(imagePath string, makeGif bool, deviation int) {
 
 	var images []*image.RGBA
 
 	if makeGif {
 		for i := 0; i < 10; i++ {
-			img := artistify("random.jpeg", false)
+			img := artistify("random.jpeg", false, deviation)
 			h = img.Bounds().Max.X
 			w = img.Bounds().Max.Y
 			images = append(images, img.(*image.RGBA))
@@ -40,5 +40,5 @@ func GenerateArtFromImage(imagePath string, makeGif bool) {
 
 		generateGif("out.gif", images)
 	}
-	artistify(imagePath, true)
+	artistify(imagePath, true, deviation)
 }

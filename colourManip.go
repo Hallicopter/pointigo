@@ -6,26 +6,28 @@ import (
 	"image/png"
 	"math/rand"
 	"os"
+	"time"
 
 	"github.com/EdlinOrg/prominentcolor"
 	"github.com/fogleman/gg"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-func artistify(imagePath string, saveFlag bool) image.Image {
+func artistify(imagePath string, saveFlag bool, deviation int) image.Image {
 	img := readImage(imagePath)
 	h := img.Bounds().Max.Y
 	w := img.Bounds().Max.X
 	palette := getPalette(img, 40)
 
 	dc := gg.NewContext(w, h)
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	for i := 0; i < w; i += 4 {
 		for j := 0; j < h; j += 4 {
 			r, g, b, _ := img.At(i, j).RGBA()
-			closest := color.RGBA{R: uint8(int(r) + posOrNeg()*rand.Intn(50)),
-				G: uint8(int(g) + posOrNeg()*rand.Intn(50)),
-				B: uint8(int(b) + posOrNeg()*rand.Intn(50)),
+			closest := color.RGBA{R: uint8(int(r) + posOrNeg()*rand.Intn(deviation)),
+				G: uint8(int(g) + posOrNeg()*rand.Intn(deviation)),
+				B: uint8(int(b) + posOrNeg()*rand.Intn(deviation)),
 				A: 0xff}
 
 			dc = paintDot(dc, float64(i), float64(j), float64(h/100), getClosestColor(palette, closest))
@@ -101,6 +103,7 @@ func getClosestColor(palette []color.RGBA, shade color.RGBA) color.RGBA {
 }
 
 func posOrNeg() int {
+
 	n := rand.Intn(1)
 
 	if n == 0 {
