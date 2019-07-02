@@ -28,7 +28,7 @@ func artistify(imagePath string, saveFlag bool) image.Image {
 				B: uint8(int(b) + posOrNeg()*rand.Intn(50)),
 				A: 0xff}
 
-			dc = paintDot(dc, float64(i), float64(j), 3, getClosestColor(palette, closest))
+			dc = paintDot(dc, float64(i), float64(j), float64(h/100), getClosestColor(palette, closest))
 		}
 	}
 	if saveFlag {
@@ -61,7 +61,7 @@ func getPalette(img image.Image, k int) []color.RGBA {
 			}
 		}
 	}
-	f, err := os.Create("output/palette.png")
+	f, err := os.Create("palette.png")
 	if err != nil {
 		panic(err)
 	}
