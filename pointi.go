@@ -32,7 +32,7 @@ func GenerateArtFromImage(imagePath string, makeGif bool, deviation int, resolut
 
 	if makeGif {
 		for i := 0; i < 10; i++ {
-			img := artistify("random.jpeg", false, deviation, resolution, colours)
+			img := artistify(imagePath, false, deviation, resolution, colours)
 			h = img.Bounds().Max.X
 			w = img.Bounds().Max.Y
 			images = append(images, img.(*image.RGBA))
